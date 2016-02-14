@@ -31,28 +31,28 @@ function onData(data) {
 	}
 };
 
-MQTT.prototype.mqttStr =function(str) {
+MQTT.prototype.mqStr =function(str) {
 	return String.fromCharCode(str.length >> 8, str.length&255) + str;
 };
 
-MQTT.prototype.mqttPkt = function(cmd, variable, payload) {
+MQTT.prototype.mqPkt = function(cmd, variable, payload) {
 	return String.fromCharCode(cmd, variable.length+payload.length)+variable+payload;
 };
 
-MQTT.prototype.mqttConn = function(id){
+MQTT.prototype.mqConn = function(id){
 
 	// Authentication?
 	var flg = 0; // flags
-	var payload = this.mqttStr(id);
+	var payload = this.mqStr(id);
 
 	if(this.usr && this.pwd) {
 		flg |= ( this.usr )? 0x80 : 0;
 		flg |= ( this.usr && this.pwd )? 0x40 : 0;
-		payload += this.mqttStr(this.usr) + this.mqttStr(this.pwd);
+		payload += this.mqStr(this.usr) + this.mqStr(this.pwd);
 	}
 	flg = String.fromCharCode(parseInt(flg.toString(16), 16));
-	return this.mqttPkt(0b00010000,
-		this.mqttStr("MQTT")/*protocol name*/+
+	return this.mqPkt(0b00010000,
+		this.mqStr("MQTT")/*protocol name*/+
 		"\x04"/*protocol level*/+
 		flg/*flags*/+
 		"\xFF\xFF"/*Keepalive*/, payload);
@@ -66,12 +66,12 @@ MQTT.prototype.connect = function(){
 		clearInterval(me.rHF);
 		me.rHF=null;
 
-		me.cli.write(me.mqttConn(getSerial()));
+		me.cli.write(me.mqConn(getSerial()));
 		me.emit("connected");
 		me.conn = true;
 		me.cli.on('data', onData.bind(me));
 		me.cli.on('end', function() {
-			me.removeAllListeners("connected"); // 1) Assuming implemented, valid in node
+			//me.removeAllListeners("connected"); // 1) Assuming implemented, valid in node
 			delete me.cli;
 			me.conn = false;
  			me.emit("disconnected");
@@ -80,21 +80,21 @@ MQTT.prototype.connect = function(){
 
 	if(!me.conn && me.rHF===null) { // if it is not connected, and we dont started the reconnection Handler, then we start it first
 
-//		me.cli = require("net").connect({host : me.srv, port: me.prt}, onConn);
+		me.cli = require("net").connect({host : me.srv, port: me.prt}, onConn);
 
 		me.rHF = setInterval(function(){
 			me.cli = require("net").connect({host : me.srv, port: me.prt}, onConn);
-		}, 1000);
+		}, 5000);
 	}
 };
 
 MQTT.prototype.subscribe = function(topic) {
-	this.cli.write(this.mqttPkt((8 << 4 | 2), String.fromCharCode(1<<8, 1&255), this.mqttStr(topic)+String.fromCharCode(1)));
+	this.cli.write(this.mqPkt((8 << 4 | 2), String.fromCharCode(1<<8, 1&255), this.mqStr(topic)+String.fromCharCode(1)));
 };
 
 MQTT.prototype.publish = function(topic, data) {
 	if(this.conn) {
-		this.cli.write(this.mqttPkt(0b00110001, this.mqttStr(topic), data));
+		this.cli.write(this.mqPkt(0b00110001, this.mqStr(topic), data));
 		this.emit("published");
 	}
 };
