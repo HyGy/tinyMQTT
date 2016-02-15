@@ -5,10 +5,10 @@ Stripped out JavaScript MQTT module that does basic PUB/SUB. Minifies to 1.58KB,
 - Supports QoS 0 only.
 - Supports authentication on username and password.
 
-Some considerable effort has gone into ensuring safe reconnection in event of MQTT broker disconnecting us and or loss of network, minimising leaked memory and ensuring no duplicated event listeners, and subsequent processes.
+Some considerable effort has gone into ensuring safe reconnection in event of MQTT broker disconnecting us and or loss of network, minimising leaked memory and ensuring no duplicated event listeners, and subsequent processes. Removed global vars, enabled re connecting event after mqtt disconnect.
 
 ## Credits
-Thanks to Gordon Williams (@gfwilliams) for several code optimization tips, that freed a further 36 jsvars and reduced file size a further 46 bytes. Thanks to Thorsten von Eicken (@tve) for the notion of understanding "ready" status.
+Thanks to Gordon Williams (@gfwilliams) for several code optimization tips, that freed a further 36 jsvars and reduced file size a further 46 bytes. Thanks to Thorsten von Eicken (@tve) for the notion of understanding "ready" status. Thanks for Ollie Phillips @olliephillips.
 
 ## How to use
 ### No config options
